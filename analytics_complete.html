@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Pro Ultra | Premium 3D Marketing Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #0a0e17;
+            --secondary: #131820;
+            --tertiary: #1a1f2e;
+            --accent1: #00d4ff;
+            --accent2: #ff006e;
+            --accent3: #8338ec;
+            --accent4: #00ff88;
+            --accent5: #ffb700;
+            --text-primary: #ffffff;
+            --text-secondary: #a0aec0;
+            --text-tertiary: #6b7280;
+            --border: #2d3748;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 50%, var(--tertiary) 100%);
+            color: var(--text-primary);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navigation Header */
+        header {
+            height: 70px;
+            background: rgba(10, 14, 23, 0.9);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            display: flex;
+            align-items: center;
+            padding: 0 2rem;
+            z-index: 1000;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.15);
+            flex-shrink: 0;
+        }
+
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2), var(--accent3));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .logo::before {
+            content: '⚡';
+            font-size: 2rem;
+        }
+
+        .header-nav {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .nav-item {
+            padding: 0.6rem 1.2rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+
+        .nav-item.active {
+            background: rgba(0, 212, 255, 0.15);
+            color: var(--accent1);
+            border: 1px solid rgba(0, 212, 255, 0.4);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .nav-item:hover {
+            background: rgba(0, 212, 255, 0.08);
+            color: var(--accent1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+        }
+
+        .header-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .stat-badge {
+            padding: 0.5rem 1rem;
+            background: rgba(0, 255, 136, 0.1);
+            border: 1px solid rgba(0, 255, 136, 0.3);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            color: var(--accent4);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .stat-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: var(--accent4);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Page Content */
+        .page {
+            display: none;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .page.active {
+            display: flex;
+        }
+
+        /* Dashboard Page */
+        #dashboardPage {
+            flex-direction: column;
+        }
+
+        .main-wrapper {
+            flex: 1;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1px;
+            padding: 1rem;
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.05) 0%, rgba(255, 0, 110, 0.05) 100%);
+            overflow: hidden;
+        }
+
+        .canvas-section {
+            background: linear-gradient(135deg, rgba(13, 20, 33, 0.8) 0%, rgba(20, 28, 45, 0.8) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 16px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.1), inset 0 0 40px rgba(0, 212, 255, 0.02);
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        .metrics-panel {
+            background: linear-gradient(135deg, rgba(13, 20, 33, 0.8) 0%, rgba(20, 28, 45, 0.8) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 0 40px rgba(255, 0, 110, 0.1), inset 0 0 40px rgba(255, 0, 110, 0.02);
+        }
+
+        .metrics-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .metrics-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .metric-group {
+            background: rgba(0, 212, 255, 0.03);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            transition: all 0.4s ease;
+        }
+
+        .metric-group:hover {
+            background: rgba(0, 212, 255, 0.08);
+            border-color: rgba(0, 212, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(0, 212, 255, 0.15);
+        }
+
+        .metric-title {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent1);
+            margin-bottom: 0.5rem;
+            font-weight: 700;
+        }
+
+        .metric-value {
+            font-size: 1.8rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent1), var(--accent4));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-change {
+            font-size: 0.8rem;
+            color: var(--accent4);
+            font-weight: 600;
+        }
+
+        .dashboard-panel {
+            background: linear-gradient(135deg, rgba(13, 20, 33, 0.8) 0%, rgba(20, 28, 45, 0.8) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.25rem;
+            box-shadow: 0 0 40px rgba(138, 56, 236, 0.1), inset 0 0 40px rgba(138, 56, 236, 0.02);
+        }
+
+        .dashboard-panel::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dashboard-panel::-webkit-scrollbar-thumb {
+            background: rgba(0, 212, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .section-header {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--accent2);
+            font-weight: 800;
+            padding-bottom: 0.75rem;
+            border-bottom: 2px solid rgba(255, 0, 110, 0.2);
+        }
+
+        .state-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: rgba(0, 212, 255, 0.05);
+            border: 2px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .state-select:hover {
+            border-color: var(--accent1);
+            background: rgba(0, 212, 255, 0.12);
+            box-shadow: 0 0 15px rgba(0, 212, 255, 0.2);
+        }
+
+        .state-select:focus {
+            outline: none;
+            border-color: var(--accent1);
+            background: rgba(0, 212, 255, 0.15);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.35);
+        }
+
+        .state-select option {
+            background: var(--secondary);
+            color: var(--text-primary);
+        }
+
+        .state-select option:checked {
+            background: rgba(0, 212, 255, 0.3);
+        }
+
+        /* Group headings (Northern States, Western States...) */
+        .state-select optgroup {
+            background: #0b2a3a;
+            color: #ffd34d;
+            font-weight: 800;
+            font-style: normal;
+            letter-spacing: 0.5px;
+        }
+
+        .state-select optgroup option {
+            background: var(--secondary);
+            color: var(--text-primary);
+            font-weight: 400;
+        }
+
+        /* Reports Page */
+        .reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            padding: 2rem;
+            overflow-y: auto;
+        }
+
+        .report-card {
+            background: linear-gradient(135deg, rgba(13, 20, 33, 0.8) 0%, rgba(20, 28, 45, 0.8) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.1);
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            cursor: pointer;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.05);
+        }
+
+        .report-card:hover {
+            border-color: rgba(0, 212, 255, 0.4);
+            transform: translateY(-8px);
+            box-shadow: 0 8px 40px rgba(0, 212, 255, 0.25);
+        }
+
+        .report-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .report-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent1);
+            margin-bottom: 0.5rem;
+        }
+
+        .report-desc {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .report-date {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* Insights Page */
+        .insights-container {
+            padding: 2rem;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .insight-card {
+            background: linear-gradient(135deg, rgba(13, 20, 33, 0.8) 0%, rgba(20, 28, 45, 0.8) 100%);
+            border-left: 4px solid var(--accent1);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.05);
+        }
+
+        .insight-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .insight-number {
+            font-size: 2.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .insight-title {
+            font-size: 1.2rem;
+            font-weight: 800;
+            color: var(--text-primary);
+        }
+
+        .insight-content {
+            color: var(--text-secondary);
+            line-height: 1.8;
+            white-space: pre-wrap;
+        }
+
+        .state-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .stat-item {
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid rgba(0, 212, 255, 0.15);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--accent1);
+        }
+
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 0.5rem;
+        }
+
+        /* Floating Background Elements */
+        .floating-bg {
+            position: fixed;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.1;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .floating-bg-1 {
+            top: -200px;
+            left: -200px;
+            background: radial-gradient(circle, var(--accent1), transparent);
+            animation: float1 20s ease-in-out infinite;
+        }
+
+        .floating-bg-2 {
+            bottom: -200px;
+            right: -200px;
+            background: radial-gradient(circle, var(--accent2), transparent);
+            animation: float2 25s ease-in-out infinite;
+        }
+
+        @keyframes float1 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(100px, 100px); }
+        }
+
+        @keyframes float2 {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(-100px, -100px); }
+        }
+
+        /* Chat Modal */
+        .chat-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .chat-modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .chat-modal-content {
+            background: linear-gradient(135deg, rgba(13, 20, 33, 0.95) 0%, rgba(20, 28, 45, 0.95) 100%);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 20px;
+            width: 90%;
+            max-width: 700px;
+            height: 80vh;
+            max-height: 800px;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 60px rgba(0, 212, 255, 0.3);
+            animation: slideUp 0.4s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .chat-modal-header {
+            padding: 1.5rem;
+            border-bottom: 1px solid rgba(0, 212, 255, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(0, 212, 255, 0.05);
+        }
+
+        .chat-modal-title {
+            font-size: 1.3rem;
+            font-weight: 800;
+            color: var(--accent1);
+        }
+
+        .close-chat-btn {
+            width: 40px;
+            height: 40px;
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            border-radius: 8px;
+            color: var(--accent1);
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+
+        .close-chat-btn:hover {
+            background: rgba(0, 212, 255, 0.2);
+            border-color: var(--accent1);
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .chat-message {
+            display: flex;
+            gap: 0.75rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .chat-message.user {
+            justify-content: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .chat-message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .chat-message.assistant .chat-message-avatar {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid var(--border);
+        }
+
+        .chat-message.user .chat-message-avatar {
+            background: rgba(255, 0, 110, 0.1);
+            border: 1px solid rgba(255, 0, 110, 0.2);
+        }
+
+        .chat-bubble {
+            max-width: 70%;
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            line-height: 1.5;
+            word-wrap: break-word;
+            white-space: pre-wrap;
+        }
+
+        .chat-message.assistant .chat-bubble {
+            background: rgba(0, 212, 255, 0.08);
+            border: 1px solid rgba(0, 212, 255, 0.2);
+            color: var(--text-primary);
+        }
+
+        .chat-message.user .chat-bubble {
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .chat-input-area {
+            padding: 1.5rem;
+            border-top: 1px solid rgba(0, 212, 255, 0.1);
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .chat-input-field {
+            flex: 1;
+            padding: 0.75rem;
+            background: rgba(0, 212, 255, 0.05);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+            font-family: inherit;
+            resize: none;
+            max-height: 100px;
+            transition: all 0.3s ease;
+        }
+
+        .chat-input-field:focus {
+            outline: none;
+            border-color: var(--accent1);
+            background: rgba(0, 212, 255, 0.1);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+        }
+
+        .chat-send-btn {
+            padding: 0.75rem 1.25rem;
+            background: linear-gradient(135deg, var(--accent1), var(--accent2));
+            color: var(--primary);
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 80px;
+        }
+
+        .chat-send-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 212, 255, 0.3);
+        }
+
+        .chat-send-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @media (max-width: 768px) {
+            header {
+                height: 60px;
+                padding: 0 1rem;
+            }
+
+            .nav-item {
+                padding: 0.4rem 0.8rem;
+                font-size: 0.75rem;
+            }
+
+            .main-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .reports-grid {
+                grid-template-columns: 1fr;
+                padding: 1rem;
+            }
+
+            .stat-badge {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="floating-bg floating-bg-1"></div>
+    <div class="floating-bg floating-bg-2"></div>
+
+    <header>
+        <div class="header-left">
+            <div class="logo" onclick="switchPage('dashboard')">Analytics Pro</div>
+            <div class="header-nav">
+                <div class="nav-item active" data-page="dashboard" onclick="switchPage('dashboard')">Dashboard</div>
+                <div class="nav-item" data-page="reports" onclick="switchPage('reports')">Reports</div>
+                <div class="nav-item" data-page="insights" onclick="switchPage('insights')">Insights</div>
+            </div>
+        </div>
+        <div class="header-right">
+            <div class="stat-badge">Live Analytics</div>
+        </div>
+    </header>
+
+    <!-- Dashboard Page -->
+    <div class="page active" id="dashboardPage">
+        <div class="main-wrapper">
+            <div class="canvas-section">
+                <canvas id="canvas3d"></canvas>
+            </div>
+
+            <div class="metrics-panel">
+                <div class="metric-group">
+                    <div class="metric-title">Total Reach</div>
+                    <div class="metric-value" id="metricReach">12.8M</div>
+                    <div class="metric-change">↑ 18% this month</div>
+                </div>
+                <div class="metric-group">
+                    <div class="metric-title">Engagement</div>
+                    <div class="metric-value" id="metricEngagement">8.4%</div>
+                    <div class="metric-change">↑ 2.1% increase</div>
+                </div>
+                <div class="metric-group">
+                    <div class="metric-title">Conversions</div>
+                    <div class="metric-value" id="metricConversions">3.2%</div>
+                    <div class="metric-change">↑ 0.6% growth</div>
+                </div>
+                <div class="metric-group">
+                    <div class="metric-title">Revenue</div>
+                    <div class="metric-value">₹4.85B</div>
+                    <div class="metric-change">↑ 45% YoY</div>
+                </div>
+            </div>
+
+            <div class="dashboard-panel">
+                <div>
+                    <div class="section-header">📍 Select State</div>
+                    <select class="state-select" id="stateSelect">
+                        <option value="" style="color: var(--accent1); font-weight: bold;">🌟 ALL INDIA</option>
+                        <optgroup label="Northern States">
+                            <option value="delhi">Delhi</option>
+                            <option value="uttar-pradesh">Uttar Pradesh</option>
+                            <option value="punjab">Punjab</option>
+                            <option value="haryana">Haryana</option>
+                            <option value="himachal-pradesh">Himachal Pradesh</option>
+                            <option value="jammu-kashmir">Jammu & Kashmir</option>
+                        </optgroup>
+                        <optgroup label="Western States">
+                            <option value="maharashtra">Maharashtra</option>
+                            <option value="rajasthan">Rajasthan</option>
+                            <option value="goa">Goa</option>
+                            <option value="gujarat">Gujarat</option>
+                        </optgroup>
+                        <optgroup label="Southern States">
+                            <option value="karnataka">Karnataka</option>
+                            <option value="tamil-nadu">Tamil Nadu</option>
+                            <option value="telangana">Telangana</option>
+                            <option value="andhra-pradesh">Andhra Pradesh</option>
+                            <option value="kerala">Kerala</option>
+                        </optgroup>
+                        <optgroup label="Eastern States">
+                            <option value="west-bengal">West Bengal</option>
+                            <option value="bihar">Bihar</option>
+                            <option value="jharkhand">Jharkhand</option>
+                            <option value="odisha">Odisha</option>
+                            <option value="assam">Assam</option>
+                        </optgroup>
+                        <optgroup label="Central States">
+                            <option value="madhya-pradesh">Madhya Pradesh</option>
+                            <option value="chhattisgarh">Chhattisgarh</option>
+                        </optgroup>
+                        <optgroup label="North Eastern States">
+                            <option value="manipur">Manipur</option>
+                            <option value="meghalaya">Meghalaya</option>
+                            <option value="mizoram">Mizoram</option>
+                            <option value="nagaland">Nagaland</option>
+                            <option value="sikkim">Sikkim</option>
+                            <option value="tripura">Tripura</option>
+                            <option value="arunachal-pradesh">Arunachal Pradesh</option>
+                        </optgroup>
+                        <optgroup label="Union Territories">
+                            <option value="chandigarh">Chandigarh</option>
+                            <option value="puducherry">Puducherry</option>
+                            <option value="lakshadweep">Lakshadweep</option>
+                            <option value="daman-diu">Daman & Diu</option>
+                            <option value="dadra-nagar-haveli">Dadra & Nagar Haveli</option>
+                            <option value="andaman-nicobar">Andaman & Nicobar</option>
+                        </optgroup>
+                    </select>
+                </div>
+
+                <div>
+                    <div class="section-header">📊 KPI Summary</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                        <div style="background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.15); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--accent1); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 600;">Reach</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary);" id="kpiReach">12.8M</div>
+                        </div>
+                        <div style="background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.15); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--accent1); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 600;">Engagement</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary);" id="kpiEngagement">8.4%</div>
+                        </div>
+                        <div style="background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.15); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--accent1); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 600;">Conversion</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary);" id="kpiConversion">3.2%</div>
+                        </div>
+                        <div style="background: rgba(0, 212, 255, 0.05); border: 1px solid rgba(0, 212, 255, 0.15); padding: 1rem; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 0.8rem; color: var(--accent1); text-transform: uppercase; margin-bottom: 0.5rem; font-weight: 600;">ROI</div>
+                            <div style="font-size: 1.4rem; font-weight: 800; color: var(--text-primary);" id="kpiROI">312%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <button id="openChatBtn" style="width: 100%; padding: 1rem; background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: var(--primary); border: none; border-radius: 10px; font-weight: 700; font-size: 0.95rem; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; transition: all 0.4s ease; margin-top: auto;"
+                        onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 12px 40px rgba(0, 212, 255, 0.4)';"
+                        onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    🤖 Open AI Chat
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reports Page -->
+    <div class="page" id="reportsPage">
+        <div class="reports-grid">
+            <div class="report-card">
+                <div class="report-icon">📊</div>
+                <div class="report-title">State Performance Report</div>
+                <div class="report-desc">Comprehensive analysis of marketing performance across all 28 Indian states with detailed metrics and comparisons.</div>
+                <div class="report-date">Updated: Nov 2024</div>
+            </div>
+            <div class="report-card">
+                <div class="report-icon">📈</div>
+                <div class="report-title">Revenue Analysis</div>
+                <div class="report-desc">In-depth revenue breakdown by state, channel, and segment. Track your top-performing markets and growth opportunities.</div>
+                <div class="report-date">Updated: Nov 2024</div>
+            </div>
+            <div class="report-card">
+                <div class="report-icon">🎯</div>
+                <div class="report-title">Campaign Performance</div>
+                <div class="report-desc">Detailed metrics on all active campaigns including reach, engagement, conversions, and ROI by region.</div>
+                <div class="report-date">Updated: Nov 2024</div>
+            </div>
+            <div class="report-card">
+                <div class="report-icon">💰</div>
+                <div class="report-title">ROI Optimization Report</div>
+                <div class="report-desc">Strategic recommendations to maximize return on investment across different marketing channels and states.</div>
+                <div class="report-date">Updated: Nov 2024</div>
+            </div>
+            <div class="report-card">
+                <div class="report-icon">👥</div>
+                <div class="report-title">Customer Demographics</div>
+                <div class="report-desc">Detailed demographic and psychographic analysis of your customers in each state with behavior patterns.</div>
+                <div class="report-date">Updated: Nov 2024</div>
+            </div>
+            <div class="report-card">
+                <div class="report-icon">📱</div>
+                <div class="report-title">Channel Performance</div>
+                <div class="report-desc">Compare performance across Social Media, Search, Email, Display Ads, and other marketing channels.</div>
+                <div class="report-date">Updated: Nov 2024</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insights Page -->
+    <div class="page" id="insightsPage">
+        <div class="insights-container">
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-number">01</div>
+                    <div class="insight-title">All India Overview</div>
+                </div>
+                <div class="insight-content">National Performance Snapshot
+
+🌟 Total Reach: 12.8 Million Users
+📊 Engagement Rate: 8.4%
+✅ Conversion Rate: 3.2%
+💰 Revenue: ₹4.85 Billion
+🚀 ROI: 312%
+📈 Growth: 45% Year-over-Year
+
+Your marketing campaigns are reaching over 12.8 million users across India with an average engagement rate of 8.4%. The national conversion rate stands at 3.2%, driving ₹4.85 billion in revenue with a strong 312% ROI.</div>
+                <div class="state-stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value">28</div>
+                        <div class="stat-label">Active States</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">8</div>
+                        <div class="stat-label">Union Territories</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value">5</div>
+                        <div class="stat-label">Top Channels</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-number">02</div>
+                    <div class="insight-title">Top Performing States</div>
+                </div>
+                <div class="insight-content">
+🥇 Maharashtra: ₹950 Crore (19.6% of revenue)
+   • Highest revenue generator
+   • Strong urban penetration
+   • Proven consumer base
+
+🥈 Karnataka: ₹720 Crore  
+   • Tech-savvy Bangalore market
+   • 22% YoY growth
+   • High B2B potential
+
+🥉 Delhi: ₹680 Crore
+   • 9.1% engagement (HIGHEST)
+   • 3.8% conversion rate (BEST)
+   • 345% ROI (PEAK)
+
+4️⃣ Tamil Nadu: ₹650 Crore
+   • Manufacturing hub
+   • Emerging tier-2 potential
+   • Regional language opportunity
+
+5️⃣ Telangana: ₹580 Crore
+   • 8.5% engagement rate
+   • IT professional target audience
+   • High scalability</div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-number">03</div>
+                    <div class="insight-title">Channel Performance Insights</div>
+                </div>
+                <div class="insight-content">
+📱 Social Media: 850K Reach (HIGHEST)
+   • Best for brand awareness
+   • Engagement-driven platform
+   • Strong in metro cities
+
+🔍 Search Ads: 720K Reach (HIGH CONVERSION)
+   • Highest ROI channel
+   • Intent-based targeting
+   • Best for immediate sales
+
+💌 Email: 650K Reach (RETENTION)
+   • Best for customer retention
+   • Cost-effective with loyal base
+   • High repeat purchase rate
+
+📺 Display Ads: 550K Reach
+   • Supporting awareness role
+   • Good for brand recall
+   • Cross-audience targeting
+
+🔗 Referral: 420K Reach
+   • Word-of-mouth amplification
+   • Loyal customer advocacy
+   • Growing organic channel</div>
+            </div>
+
+            <div class="insight-card">
+                <div class="insight-header">
+                    <div class="insight-number">04</div>
+                    <div class="insight-title">Growth Opportunities</div>
+                </div>
+                <div class="insight-content">
+🚀 Tier-2 City Expansion
+   • Maharashtra: Pune, Nagpur growth
+   • Karnataka: Mysore, Hubli potential
+   • Tamil Nadu: Coimbatore, Salem untapped
+   → Estimated Impact: +₹100-150 Cr
+
+🌐 Regional Language Localization  
+   • Tamil Nadu: Tamil content
+   • Telangana: Telugu messaging
+   • Bengal: Bengali campaigns
+   → Estimated Impact: +₹80-120 Cr
+
+💻 Tech-Focused B2B Strategy
+   • Bangalore, Hyderabad target
+   • Enterprise solutions marketing
+   • LinkedIn + professional networks
+   → Estimated Impact: +₹60-100 Cr
+
+📱 Mobile-First Approach
+   • 75% users on mobile
+   • App-based loyalty programs
+   • SMS + push notifications
+   → Estimated Impact: +₹40-80 Cr
+
+Total Opportunity: ₹280-450 Crore additional revenue potential</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chat Modal -->
+    <div class="chat-modal" id="chatModal">
+        <div class="chat-modal-content">
+            <div class="chat-modal-header">
+                <div class="chat-modal-title">🤖 Marketing AI Assistant</div>
+                <button class="close-chat-btn" id="closeChatBtn">×</button>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="chat-message assistant">
+                    <div class="chat-message-avatar">🤖</div>
+                    <div class="chat-bubble">Hi! 👋 Ask me about marketing performance across Indian states, campaign strategies, or get AI-powered insights.</div>
+                </div>
+            </div>
+            <div class="chat-input-area">
+                <textarea class="chat-input-field" id="chatInput" placeholder="Ask about marketing strategies..." rows="1"></textarea>
+                <button class="chat-send-btn" id="chatSendBtn">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Page Switching
+        function switchPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            
+            document.getElementById(pageName + 'Page').classList.add('active');
+            document.querySelector(`[data-page="${pageName}"]`).classList.add('active');
+        }
+
+        // 3D Canvas Setup
+        const canvas = document.getElementById('canvas3d');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, canvas.clientWidth / canvas.clientHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        
+        renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+        renderer.setClearColor(0x0a0e17, 0.1);
+        renderer.shadowMap.enabled = true;
+        
+        camera.position.z = 10;
+
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
+        scene.add(ambientLight);
+
+        const pointLight1 = new THREE.PointLight(0x00d4ff, 2);
+        pointLight1.position.set(8, 8, 8);
+        pointLight1.castShadow = true;
+        scene.add(pointLight1);
+
+        const pointLight2 = new THREE.PointLight(0xff006e, 1.5);
+        pointLight2.position.set(-8, -8, 8);
+        pointLight2.castShadow = true;
+        scene.add(pointLight2);
+
+        const cubes = [];
+        const colors = [0x00d4ff, 0xff006e, 0x8338ec, 0x00ff88, 0xffb700];
+        
+        for (let i = 0; i < 6; i++) {
+            const geometry = new THREE.BoxGeometry(1.2, 1.2, 1.2);
+            const material = new THREE.MeshStandardMaterial({
+                color: colors[i % colors.length],
+                metalness: 0.5,
+                roughness: 0.1,
+                emissive: colors[i % colors.length],
+                emissiveIntensity: 0.4
+            });
+            const cube = new THREE.Mesh(geometry, material);
+            cube.castShadow = true;
+            cube.receiveShadow = true;
+            
+            cube.position.x = (i - 2.5) * 2.8;
+            cube.position.y = Math.sin(i * 0.8) * 2.5;
+            cube.velocity = {
+                x: (Math.random() - 0.5) * 0.025,
+                y: (Math.random() - 0.5) * 0.025,
+                z: (Math.random() - 0.5) * 0.025
+            };
+            
+            cubes.push(cube);
+            scene.add(cube);
+        }
+
+        const particleGeometry = new THREE.BufferGeometry();
+        const particleCount = 500;
+        const positionArray = new Float32Array(particleCount * 3);
+
+        for (let i = 0; i < particleCount * 3; i++) {
+            positionArray[i] = (Math.random() - 0.5) * 30;
+        }
+
+        particleGeometry.setAttribute('position', new THREE.BufferAttribute(positionArray, 3));
+        const particleMaterial = new THREE.PointsMaterial({
+            size: 0.15,
+            color: 0x00d4ff,
+            sizeAttenuation: true,
+            transparent: true,
+            opacity: 0.6
+        });
+
+        const particles = new THREE.Points(particleGeometry, particleMaterial);
+        scene.add(particles);
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            cubes.forEach((cube) => {
+                cube.rotation.x += cube.velocity.x + 0.01;
+                cube.rotation.y += cube.velocity.y + 0.01;
+                cube.position.x += cube.velocity.x * 0.3;
+                cube.position.y += cube.velocity.y * 0.3;
+
+                if (Math.abs(cube.position.x) > 6) cube.velocity.x *= -1;
+                if (Math.abs(cube.position.y) > 6) cube.velocity.y *= -1;
+            });
+
+            particles.rotation.x += 0.00015;
+            particles.rotation.y += 0.0003;
+
+            pointLight1.intensity = 2 + Math.sin(Date.now() * 0.001) * 0.8;
+            pointLight2.intensity = 1.5 + Math.cos(Date.now() * 0.0008) * 0.5;
+
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        window.addEventListener('resize', () => {
+            const width = canvas.clientWidth;
+            const height = canvas.clientHeight;
+            camera.aspect = width / height;
+            camera.updateProjectionMatrix();
+            renderer.setSize(width, height);
+        });
+
+        // State Data - ALL STATES
+        const allStatesData = {
+            '': { reach: '12.8M', engagement: '8.4%', conversion: '3.2%', roi: '312%' },
+            'delhi': { reach: '1.9M', engagement: '9.1%', conversion: '3.8%', roi: '345%' },
+            'maharashtra': { reach: '2.4M', engagement: '8.4%', conversion: '3.2%', roi: '312%' },
+            'karnataka': { reach: '1.7M', engagement: '8.2%', conversion: '3.0%', roi: '298%' },
+            'tamil-nadu': { reach: '1.8M', engagement: '7.9%', conversion: '2.9%', roi: '285%' },
+            'telangana': { reach: '1.5M', engagement: '8.5%', conversion: '3.4%', roi: '320%' },
+            'andhra-pradesh': { reach: '1.3M', engagement: '7.8%', conversion: '2.8%', roi: '280%' },
+            'uttar-pradesh': { reach: '2.1M', engagement: '7.5%', conversion: '2.7%', roi: '275%' },
+            'west-bengal': { reach: '1.2M', engagement: '7.6%', conversion: '2.6%', roi: '270%' },
+            'rajasthan': { reach: '1.1M', engagement: '7.4%', conversion: '2.5%', roi: '265%' },
+            'punjab': { reach: '0.9M', engagement: '8.0%', conversion: '3.1%', roi: '305%' },
+            'haryana': { reach: '0.8M', engagement: '8.2%', conversion: '3.2%', roi: '310%' },
+            'himachal-pradesh': { reach: '0.4M', engagement: '7.9%', conversion: '2.8%', roi: '288%' },
+            'jammu-kashmir': { reach: '0.3M', engagement: '7.3%', conversion: '2.4%', roi: '260%' },
+            'goa': { reach: '0.2M', engagement: '8.6%', conversion: '3.5%', roi: '330%' },
+            'gujarat': { reach: '1.6M', engagement: '8.1%', conversion: '3.0%', roi: '295%' },
+            'kerala': { reach: '0.7M', engagement: '8.3%', conversion: '3.1%', roi: '315%' },
+            'bihar': { reach: '0.6M', engagement: '7.2%', conversion: '2.3%', roi: '250%' },
+            'jharkhand': { reach: '0.5M', engagement: '7.1%', conversion: '2.2%', roi: '245%' },
+            'odisha': { reach: '0.7M', engagement: '7.5%', conversion: '2.6%', roi: '270%' },
+            'assam': { reach: '0.8M', engagement: '7.4%', conversion: '2.5%', roi: '265%' },
+            'madhya-pradesh': { reach: '1.0M', engagement: '7.3%', conversion: '2.4%', roi: '260%' },
+            'chhattisgarh': { reach: '0.5M', engagement: '7.0%', conversion: '2.1%', roi: '240%' },
+            'manipur': { reach: '0.1M', engagement: '6.8%', conversion: '2.0%', roi: '230%' },
+            'meghalaya': { reach: '0.15M', engagement: '6.9%', conversion: '2.1%', roi: '235%' },
+            'mizoram': { reach: '0.08M', engagement: '7.1%', conversion: '2.2%', roi: '245%' },
+            'nagaland': { reach: '0.1M', engagement: '7.0%', conversion: '2.1%', roi: '240%' },
+            'sikkim': { reach: '0.05M', engagement: '7.2%', conversion: '2.3%', roi: '250%' },
+            'tripura': { reach: '0.12M', engagement: '7.1%', conversion: '2.2%', roi: '245%' },
+            'arunachal-pradesh': { reach: '0.1M', engagement: '6.9%', conversion: '2.1%', roi: '235%' },
+            'chandigarh': { reach: '0.3M', engagement: '8.4%', conversion: '3.3%', roi: '325%' },
+            'puducherry': { reach: '0.2M', engagement: '8.1%', conversion: '3.0%', roi: '300%' },
+            'lakshadweep': { reach: '0.02M', engagement: '7.5%', conversion: '2.7%', roi: '280%' },
+            'daman-diu': { reach: '0.05M', engagement: '8.0%', conversion: '2.9%', roi: '290%' },
+            'dadra-nagar-haveli': { reach: '0.08M', engagement: '7.8%', conversion: '2.8%', roi: '285%' },
+            'andaman-nicobar': { reach: '0.06M', engagement: '7.7%', conversion: '2.7%', roi: '282%' }
+        };
+
+        document.getElementById('stateSelect').addEventListener('change', (e) => {
+            const state = e.target.value;
+            if (allStatesData[state]) {
+                const data = allStatesData[state];
+                document.getElementById('kpiReach').textContent = data.reach;
+                document.getElementById('kpiEngagement').textContent = data.engagement;
+                document.getElementById('kpiConversion').textContent = data.conversion;
+                document.getElementById('kpiROI').textContent = data.roi;
+                document.getElementById('metricReach').textContent = data.reach;
+                document.getElementById('metricEngagement').textContent = data.engagement;
+                document.getElementById('metricConversions').textContent = data.conversion;
+            }
+        });
+
+        // AI Chat Functionality
+        const chatModal = document.getElementById('chatModal');
+        const openChatBtn = document.getElementById('openChatBtn');
+        const closeChatBtn = document.getElementById('closeChatBtn');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const chatSendBtn = document.getElementById('chatSendBtn');
+
+        openChatBtn.addEventListener('click', () => {
+            chatModal.classList.add('active');
+            chatInput.focus();
+        });
+
+        closeChatBtn.addEventListener('click', () => {
+            chatModal.classList.remove('active');
+        });
+
+        chatModal.addEventListener('click', (e) => {
+            if (e.target === chatModal) {
+                chatModal.classList.remove('active');
+            }
+        });
+
+        chatInput.addEventListener('input', () => {
+            chatInput.style.height = 'auto';
+            chatInput.style.height = Math.min(chatInput.scrollHeight, 100) + 'px';
+        });
+
+        chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendChatMessage();
+            }
+        });
+
+        chatSendBtn.addEventListener('click', sendChatMessage);
+
+        const aiResponses = {
+            'andhra-pradesh': {
+                response: `Andhra Pradesh - Emerging Growth Market 📈\n\n✅ **Andhra Pradesh Performance Metrics:**\n• Revenue: ₹450 Crore\n• Engagement Rate: 7.8%\n• Conversion Rate: 2.8%\n• Growth Potential: High\n\n🎯 **Key Insights:**\n- Visakhapatnam's port city advantage for B2B\n- Tier-2 city growth potential\n- Agricultural sector opportunities\n- Rising digital adoption\n\n💡 **Recommendations:**\n1. Target port and logistics sector\n2. Localize Telugu content\n3. Expand to Visakhapatnam and Vijayawada\n4. Agricultural tech product focus`,
+                keywords: ['andhra', 'andhrapradesh', 'ap']
+            }
+        };
+
+
+        // ---------- Local AI answer engine (works offline, uses the dashboard data) ----------
+        const NATIONAL = { reach: '12.8M', engagement: '8.4%', conversion: '3.2%', roi: '312%' };
+        const ALIASES = {
+            'andhra-pradesh': ['andhra', 'andhrapradesh', 'ap'], 'tamil-nadu': ['tamil nadu', 'tamilnadu', 'tn'],
+            'uttar-pradesh': ['uttar pradesh', 'up'], 'madhya-pradesh': ['madhya pradesh', 'mp'],
+            'west-bengal': ['west bengal', 'bengal', 'wb'], 'jammu-kashmir': ['jammu', 'kashmir', 'j&k', 'jk'],
+            'himachal-pradesh': ['himachal', 'hp'], 'arunachal-pradesh': ['arunachal'],
+            'daman-diu': ['daman', 'diu'], 'dadra-nagar-haveli': ['dadra', 'nagar haveli'],
+            'andaman-nicobar': ['andaman', 'nicobar'], 'delhi': ['delhi', 'new delhi', 'ncr']
+        };
+        const num = v => { const n = parseFloat(v); return /M/i.test(v) ? n : n; };
+        const stateName = k => {
+            const o = document.querySelector('#stateSelect option[value="' + k + '"]');
+            return o ? o.textContent.trim() : k.split('-').map(w => w[0].toUpperCase() + w.slice(1)).join(' ');
+        };
+        const stateKeys = Object.keys(allStatesData).filter(k => k);
+        function findStates(q) {
+            const found = [];
+            stateKeys.forEach(k => {
+                const names = [k.replace(/-/g, ' '), k.replace(/-/g, '')].concat(ALIASES[k] || []);
+                const hit = names.some(n => {
+                    const esc = n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    return new RegExp('(^|[^a-z])' + esc + '([^a-z]|$)').test(q);
+                });
+                if (hit) found.push(k);
+            });
+            return found;
+        }
+        const rankBy = (m) => stateKeys.slice().sort((a, b) => num(allStatesData[b][m]) - num(allStatesData[a][m]));
+        const unit = { reach: 'reach', engagement: 'engagement', conversion: 'conversion', roi: 'ROI' };
+        const vs = (a, b) => { const d = num(a) - num(b); return (d >= 0 ? '+' : '') + d.toFixed(1); };
+
+        function stateReply(k) {
+            if (aiResponses[k]) return aiResponses[k].response;
+            const d = allStatesData[k], rk = rankBy('roi').indexOf(k) + 1, roi = num(d.roi);
+            let tier, recs;
+            if (roi >= 320) { tier = 'Top-performing market'; recs = ['Scale budget on the best-performing channels', 'Push premium / upsell offers', 'Build lookalike audiences from current buyers', 'Invest in loyalty and retention']; }
+            else if (roi >= 290) { tier = 'Strong market'; recs = ['A/B test creatives and offers', 'Add regional-language variants', 'Retarget visitors who did not convert', 'Test one new channel at small budget']; }
+            else if (roi >= 265) { tier = 'Growing mid-tier market'; recs = ['Localize content and landing pages', 'Work with regional influencers', 'Fix the conversion funnel before raising spend', 'Focus on the top 2-3 cities first']; }
+            else { tier = 'Emerging market'; recs = ['Start awareness-first with low-cost vernacular video', 'Use WhatsApp and local partnerships', 'Test small budgets before scaling', 'Track one city as a pilot']; }
+            const weak = [];
+            if (num(d.engagement) < num(NATIONAL.engagement)) weak.push('engagement');
+            if (num(d.conversion) < num(NATIONAL.conversion)) weak.push('conversion');
+            return stateName(k) + ' - ' + tier + '\n\n' +
+                '**Performance:**\n' +
+                '• Reach: ' + d.reach + '\n' +
+                '• Engagement: ' + d.engagement + ' (' + vs(d.engagement, NATIONAL.engagement) + ' pts vs national)\n' +
+                '• Conversion: ' + d.conversion + ' (' + vs(d.conversion, NATIONAL.conversion) + ' pts vs national)\n' +
+                '• ROI: ' + d.roi + ' (rank #' + rk + ' of ' + stateKeys.length + ')\n\n' +
+                '**Insight:** ' + (weak.length ? 'Below the national average on ' + weak.join(' and ') + ', so improving that is the quickest win.' : 'At or above the national average on both engagement and conversion.') + '\n\n' +
+                '**Recommendations:**\n' + recs.map((r, i) => (i + 1) + '. ' + r).join('\n');
+        }
+
+        function compareReply(keys) {
+            const rows = keys.slice(0, 3).map(k => {
+                const d = allStatesData[k];
+                return '**' + stateName(k) + '**\n• Reach ' + d.reach + ' | Engagement ' + d.engagement + ' | Conversion ' + d.conversion + ' | ROI ' + d.roi;
+            });
+            const best = keys.slice(0, 3).sort((a, b) => num(allStatesData[b].roi) - num(allStatesData[a].roi))[0];
+            return 'Comparison:\n\n' + rows.join('\n\n') + '\n\n**Verdict:** ' + stateName(best) + ' leads on ROI (' + allStatesData[best].roi + ').';
+        }
+
+        function generateReply(message) {
+            const q = ' ' + message.toLowerCase().replace(/[^a-z0-9&.% ]+/g, ' ').replace(/\s+/g, ' ').trim() + ' ';
+            const found = findStates(q.trim());
+            const picked = document.getElementById('stateSelect') ? document.getElementById('stateSelect').value : '';
+            const metric = /roi|return/.test(q) ? 'roi' : /reach|audience/.test(q) ? 'reach' : /engag/.test(q) ? 'engagement' : /convers|convert/.test(q) ? 'conversion' : 'roi';
+
+            if (/^ (hi|hello|hey|hii|namaste|hola) /.test(q) && found.length === 0)
+                return 'Hi! 👋 I can help with marketing performance across Indian states.\n\nTry:\n• "Tell me about Karnataka"\n• "Compare Delhi and Maharashtra"\n• "Top 5 states by ROI"\n• "Which states have the lowest conversion?"';
+
+            if (found.length >= 2 || (/compare|versus| vs /.test(q) && found.length >= 2)) return compareReply(found);
+            if (found.length === 1) return stateReply(found[0]);
+
+            if (/top|best|highest|leading|strongest/.test(q)) {
+                const n = (q.match(/\b(\d+)\b/) || [])[1] ? Math.min(+q.match(/\b(\d+)\b/)[1], 10) : 5;
+                return 'Top ' + n + ' states by ' + unit[metric] + ':\n\n' + rankBy(metric).slice(0, n).map((k, i) => (i + 1) + '. ' + stateName(k) + ' - ' + allStatesData[k][metric]).join('\n');
+            }
+            if (/lowest|worst|weak|bottom|least|poor|underperform/.test(q)) {
+                const n = (q.match(/\b(\d+)\b/) || [])[1] ? Math.min(+q.match(/\b(\d+)\b/)[1], 10) : 5;
+                return 'Bottom ' + n + ' states by ' + unit[metric] + ' (biggest opportunity to improve):\n\n' + rankBy(metric).slice(-n).reverse().map((k, i) => (i + 1) + '. ' + stateName(k) + ' - ' + allStatesData[k][metric]).join('\n');
+            }
+            if (/this state|selected|current state|here/.test(q) && picked) return stateReply(picked);
+            if (/national|overall|india|summary|overview|all states|performance/.test(q)) {
+                if (picked && /(this|selected)/.test(q)) return stateReply(picked);
+                return 'National overview 🇮🇳\n\n• Reach: ' + NATIONAL.reach + '\n• Engagement: ' + NATIONAL.engagement + '\n• Conversion: ' + NATIONAL.conversion + '\n• ROI: ' + NATIONAL.roi + '\n\nBest ROI: ' + stateName(rankBy('roi')[0]) + ' (' + allStatesData[rankBy('roi')[0]].roi + ')\nHighest reach: ' + stateName(rankBy('reach')[0]) + ' (' + allStatesData[rankBy('reach')[0]].reach + ')';
+            }
+            if (/strateg|recommend|improve|increase|grow|budget|campaign|tips|suggest|advice/.test(q)) {
+                if (picked) return stateReply(picked);
+                return 'General strategy tips:\n\n1. Scale spend where ROI is above 320% (' + rankBy('roi').slice(0, 3).map(stateName).join(', ') + ')\n2. Fix conversion in states below 2.5% before adding budget\n3. Localize content in regional languages\n4. Retarget engaged users who did not convert\n5. Pilot emerging markets with small budgets\n\nAsk about a specific state for tailored advice.';
+            }
+            return 'I can answer questions about marketing across all Indian states and UTs 🇮🇳\n\nTry:\n• "Tell me about Tamil Nadu"\n• "Compare Telangana and Karnataka"\n• "Top 5 states by conversion"\n• "Which states have the lowest ROI?"\n• "Give me a strategy for Bihar"';
+        }
+
+        async function sendChatMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            addChatMessage(message, 'user');
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+
+            showChatLoading();
+            chatSendBtn.disabled = true;
+
+            await new Promise(r => setTimeout(r, 450));
+            removeChatLoading();
+            let reply;
+            try { reply = generateReply(message); }
+            catch (err) { console.error(err); reply = 'Sorry, I could not read that. Try: "Tell me about Karnataka" or "Top 5 states by ROI".'; }
+            addChatMessage(reply, 'assistant');
+
+            chatSendBtn.disabled = false;
+        }
+
+        function addChatMessage(text, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `chat-message ${sender}`;
+
+            const avatar = document.createElement('div');
+            avatar.className = 'chat-message-avatar';
+            avatar.textContent = sender === 'assistant' ? '🤖' : '👤';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'chat-bubble';
+            const safe = String(text).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            bubble.innerHTML = safe.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(bubble);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showChatLoading() {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message assistant';
+            messageDiv.id = 'loadingMessage';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'chat-message-avatar';
+            avatar.textContent = '🤖';
+
+            const loading = document.createElement('div');
+            loading.style.display = 'flex';
+            loading.style.gap = '0.5rem';
+            loading.innerHTML = '<div style="width: 8px; height: 8px; background: var(--accent1); border-radius: 50%; animation: bounce 1.4s infinite;"></div><div style="width: 8px; height: 8px; background: var(--accent1); border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.2s;"></div><div style="width: 8px; height: 8px; background: var(--accent1); border-radius: 50%; animation: bounce 1.4s infinite; animation-delay: 0.4s;"></div>';
+
+            messageDiv.appendChild(avatar);
+            messageDiv.appendChild(loading);
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function removeChatLoading() {
+            const loadingMessage = document.getElementById('loadingMessage');
+            if (loadingMessage) loadingMessage.remove();
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Chat</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="app">
+
+        <!-- Header -->
+        <header class="header">
+
+            <div class="logo-section">
+                <div class="logo">✦</div>
+
+                <div>
+                    <h1>AI Chat</h1>
+                    <p>General AI Assistant</p>
+                </div>
+            </div>
+
+            <button id="newChatBtn">
+                + New Chat
+            </button>
+
+        </header>
+
+
+        <!-- Chat Area -->
+        <main id="chatArea" class="chat-area">
+
+            <div class="welcome">
+
+                <div class="welcome-icon">
+                    ✦
+                </div>
+
+                <h2>How can I help you?</h2>
+
+                <p>
+                    Ask anything about coding, mathematics,
+                    science, study, writing and general knowledge.
+                </p>
+
+                <div class="suggestions">
+
+                    <button class="suggestion">
+                        Explain artificial intelligence
+                    </button>
+
+                    <button class="suggestion">
+                        Write a Python palindrome program
+                    </button>
+
+                    <button class="suggestion">
+                        What is a database?
+                    </button>
+
+                    <button class="suggestion">
+                        Explain recursion simply
+                    </button>
+
+                </div>
+
+            </div>
+
+        </main>
+
+
+        <!-- Message Input -->
+        <div class="input-section">
+
+            <textarea
+                id="messageInput"
+                placeholder="Ask anything..."
+                rows="1">
+            </textarea>
+
+            <button id="sendBtn">
+                ➤
+            </button>
+
+        </div>
+
+        <p class="disclaimer">
+            AI can make mistakes. Check important information.
+        </p>
+
+    </div>
+
+
+    <script src="script.js"></script>
+
+</body>
+
+</html>

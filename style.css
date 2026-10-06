@@ -1,0 +1,361 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+
+    background: #070b16;
+
+    color: white;
+
+    min-height: 100vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+/* Main application */
+
+.app {
+    width: 94%;
+    max-width: 1200px;
+
+    height: 92vh;
+
+    background: #0d1424;
+
+    border: 1px solid #273653;
+
+    border-radius: 24px;
+
+    display: flex;
+    flex-direction: column;
+
+    overflow: hidden;
+}
+
+
+/* Header */
+
+.header {
+    padding: 22px 30px;
+
+    border-bottom: 1px solid #273653;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo-section {
+    display: flex;
+    align-items: center;
+
+    gap: 15px;
+}
+
+.logo {
+    width: 58px;
+    height: 58px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 16px;
+
+    font-size: 30px;
+
+    background: linear-gradient(
+        135deg,
+        #6558ff,
+        #1baef5
+    );
+}
+
+.logo-section h1 {
+    font-size: 25px;
+}
+
+.logo-section p {
+    color: #91a5c8;
+
+    margin-top: 5px;
+}
+
+
+/* New chat button */
+
+#newChatBtn {
+    background: #17233a;
+
+    color: white;
+
+    border: 1px solid #344866;
+
+    border-radius: 12px;
+
+    padding: 12px 18px;
+
+    cursor: pointer;
+
+    font-size: 15px;
+}
+
+#newChatBtn:hover {
+    background: #223452;
+}
+
+
+/* Chat */
+
+.chat-area {
+    flex: 1;
+
+    overflow-y: auto;
+
+    padding: 35px;
+}
+
+
+/* Welcome */
+
+.welcome {
+    max-width: 700px;
+
+    margin: 60px auto;
+
+    text-align: center;
+}
+
+.welcome-icon {
+    width: 70px;
+    height: 70px;
+
+    margin: auto;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border-radius: 20px;
+
+    font-size: 35px;
+
+    background: linear-gradient(
+        135deg,
+        #6558ff,
+        #1baef5
+    );
+}
+
+.welcome h2 {
+    font-size: 30px;
+
+    margin-top: 20px;
+}
+
+.welcome p {
+    color: #91a5c8;
+
+    line-height: 1.6;
+
+    margin-top: 10px;
+}
+
+
+/* Suggestions */
+
+.suggestions {
+    margin-top: 30px;
+
+    display: grid;
+
+    grid-template-columns: 1fr 1fr;
+
+    gap: 12px;
+}
+
+.suggestion {
+    padding: 16px;
+
+    text-align: left;
+
+    color: #dce7ff;
+
+    background: #121d31;
+
+    border: 1px solid #2b3d5c;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background: #1b2b47;
+}
+
+
+/* Messages */
+
+.message-row {
+    display: flex;
+
+    margin: 15px 0;
+}
+
+.message-row.user {
+    justify-content: flex-end;
+}
+
+.message-row.ai {
+    justify-content: flex-start;
+}
+
+.message {
+    max-width: 75%;
+
+    padding: 15px 18px;
+
+    border-radius: 17px;
+
+    line-height: 1.6;
+
+    white-space: pre-wrap;
+}
+
+.message.user {
+    background: #2f68e8;
+
+    border-bottom-right-radius: 5px;
+}
+
+.message.ai {
+    background: #18243a;
+
+    border: 1px solid #2c3e5c;
+
+    border-bottom-left-radius: 5px;
+}
+
+
+/* Input */
+
+.input-section {
+    display: flex;
+
+    gap: 12px;
+
+    align-items: flex-end;
+
+    padding: 18px 35px;
+
+    border-top: 1px solid #273653;
+}
+
+#messageInput {
+    flex: 1;
+
+    resize: none;
+
+    min-height: 55px;
+
+    max-height: 150px;
+
+    padding: 16px;
+
+    border-radius: 15px;
+
+    border: 1px solid #304563;
+
+    outline: none;
+
+    background: #09101e;
+
+    color: white;
+
+    font-size: 16px;
+}
+
+#messageInput:focus {
+    border-color: #4b80ed;
+}
+
+#sendBtn {
+    width: 55px;
+    height: 55px;
+
+    border: none;
+
+    border-radius: 15px;
+
+    background: #2f68e8;
+
+    color: white;
+
+    font-size: 23px;
+
+    cursor: pointer;
+}
+
+#sendBtn:hover {
+    background: #3d76ef;
+}
+
+#sendBtn:disabled {
+    opacity: 0.5;
+
+    cursor: not-allowed;
+}
+
+
+/* Disclaimer */
+
+.disclaimer {
+    text-align: center;
+
+    color: #7185a8;
+
+    font-size: 12px;
+
+    padding-bottom: 14px;
+}
+
+
+/* Mobile */
+
+@media (max-width: 700px) {
+
+    .app {
+        width: 100%;
+        height: 100vh;
+
+        border-radius: 0;
+    }
+
+    .header {
+        padding: 18px;
+    }
+
+    .chat-area {
+        padding: 20px;
+    }
+
+    .input-section {
+        padding: 15px;
+    }
+
+    .suggestions {
+        grid-template-columns: 1fr;
+    }
+
+    .message {
+        max-width: 90%;
+    }
+}
